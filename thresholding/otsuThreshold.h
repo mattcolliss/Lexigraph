@@ -1,0 +1,16 @@
+/////////////////////////////////////////////////////////////////////////////
+//
+// Matthew Colliss
+// Otsu Threshold
+//
+/////////////////////////////////////////////////////////////////////////////
+
+#ifndef OTSUTHRESHOLD_H_
+#include <cv.h>
+#include <stdio.h>
+#include <stdlib.h>
+#define OTSUTHRESHOLD_H_
+
+void otsuThreshold(IplImage *img);
+
+#endif /* OTSUTHRESHOLD_H_ */
