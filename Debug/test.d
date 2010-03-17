@@ -7,7 +7,8 @@ test.d test.o: ../test.c /usr/include/opencv/cv.h \
  ../thresholding/localOtsuThreshold.h \
  ../thresholding/localIterativeThreshold.h \
  ../thresholding/repeatedIterativeThresholding.h \
- ../connectedComponentLabelling.h ../sizeFilter.h
+ ../connectedComponentLabelling.h ../sizeFilter.h ../sobelFilter.h \
+ ../convolution.h
 
 /usr/include/opencv/cv.h:
 
@@ -40,3 +41,7 @@ test.d test.o: ../test.c /usr/include/opencv/cv.h \
 ../connectedComponentLabelling.h:
 
 ../sizeFilter.h:
+
+../sobelFilter.h:
+
+../convolution.h:

@@ -13,7 +13,6 @@
 #include "connectedComponentLabelling.h"
 #define SIZEFILTER_H_
 
-void sizeFilter(CCL_Object source);
-void sizeFilter2(CCL_Object source);
+CCL_Object sizeFilter(CCL_Object source);
 
 #endif /* SIZEFILTER_H_ */
