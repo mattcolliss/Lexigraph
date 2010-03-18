@@ -28,7 +28,8 @@ void buildCloseList(int close[],CCL_Object source)
 	{
 		for(int j = 1;j < width;j++)
 		{
-			if(labels[i][j] != 0 && close[labels[i][j]] == 0)
+			//if(labels[i][j] != 0 && close[labels[i][j]] == 0)
+			if(labels[i][j] != 0)
 			{
 				for(int a = i - 1;a <= i + 1;a++)
 				{
@@ -36,8 +37,9 @@ void buildCloseList(int close[],CCL_Object source)
 					{
 						if(labels[a][b] != 0 && labels[a][b] != labels[i][j])
 						{
-							close[labels[i][j]] = 1;
-							break;
+							//close[labels[i][j]] = 1;
+							//break;
+							close[labels[i][j]]++;
 						}
 					}
 				}
@@ -59,7 +61,7 @@ CCL_Object sizeFilter(CCL_Object source)
 	{
 		//printf("%i \n",source.classSizes[i]);
 		int size = source.classSizes[i];
-		if((size <= MIN_SIZE && close[i] == 0) || size >= MAX_SIZE)
+		if((size <= MIN_SIZE && close[i] < 1) || size >= MAX_SIZE)
 		{
 			source.classSizes[i] = 0;
 			source.minI[i] = 9999;

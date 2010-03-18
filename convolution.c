@@ -34,13 +34,39 @@ void convolve(int target[],int kernal[],int kernalSize,int height,int width,IplI
 			//initialise results array while looping
 			results[i][j] = 0;
 		}
+	}
+	//iterate over all pixels
+	int margin = kernalSize / 2;
+	for(int i = margin;i < height-margin;i++)
+	{
+		for(int j = margin;j < width-margin;j++)
+		{
 
+			int sum = 0;
+			// memory release for img before exiting the application
+			for(int n = 0-margin;n <= 0 + margin; n++)
+			{
+				for(int m = 0-margin;m <= 0 + margin; m++)
+				{
+
+					if(m != 0 || n != 0)
+					{
+						sum += image[i + n][j + m] * kernal2D[margin - n][margin - m];
+					}
+
+				}
+			}
+			results[i][j] = sum;
+
+		}
 	}
 
-
-
-
-
-
-
+	for(int i = 0; i < height;i++)
+	{
+		for(int j = 0; j < width; j++)
+		{
+			target[(i * width) + j] = results[i][j];
+		}
+	}
 }
+

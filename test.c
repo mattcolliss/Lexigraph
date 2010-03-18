@@ -44,6 +44,10 @@ int main (int argc, char *argv[])
 	IplImage *img2 = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
 	cvCvtColor(img,img2,CV_BGR2GRAY);
 
+	//convert image to grey scale, keep this one for later
+	IplImage *img3 = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
+	cvCvtColor(img,img3,CV_BGR2GRAY);
+
 	//Threshold the image
 	//localAdaptiveThreshold(img2,15,15);
 	//otsuThreshold(img2);
@@ -61,50 +65,50 @@ int main (int argc, char *argv[])
 	cclPositive = sizeFilter(cclPositive);
 
 	//second test, sobel
-	cclPositive = sobelFilter(cclPositive,img2);
+	cclPositive = sobelFilter(cclPositive,img3);
 
 
 	////////////////////////////////////////////////////
 	int target[cclPositive.height][cclPositive.width];
 
-		for(int i = 0;i < cclPositive.height;i++)
-			{
-				for(int j = 0;j < cclPositive.width;j++)
-				{
-					int pix = cclPositive.labels[(i * cclPositive.width) + j];
-					if(pix != 0)
-					target[i][j] =  255;
-					else
-						target[i][j] = 0;
-
-				}
-			}
-
-		//create temp image to display results
-		IplImage *temp = cvCreateImage(cvSize(cclPositive.width,cclPositive.height),IPL_DEPTH_8U,1);
-		uchar* data = (uchar *)temp->imageData;
-		//copy new data into image
-		for(int i = 0; i < cclPositive.height;i++)
+	for(int i = 0;i < cclPositive.height;i++)
+	{
+		for(int j = 0;j < cclPositive.width;j++)
 		{
-			for(int j = 0; j < cclPositive.width; j++)
-			{
-				data[(i*temp->widthStep) + j ] = target[i][j];
-				//printf("%i %i %u \n",i,j,test[i][j]);
-			}
+			int pix = cclPositive.labels[(i * cclPositive.width) + j];
+			if(pix != 0)
+				target[i][j] =  255;
+			else
+				target[i][j] = 0;
+
 		}
-		temp->imageData = (char*)data;
+	}
 
-		// a visualization window is created with title 'image'
-		cvNamedWindow ("image2", 1);
-		// img is shown in 'image' window
-		cvShowImage ("image2", temp);
+	//create temp image to display results
+	IplImage *temp = cvCreateImage(cvSize(cclPositive.width,cclPositive.height),IPL_DEPTH_8U,1);
+	uchar* data = (uchar *)temp->imageData;
+	//copy new data into image
+	for(int i = 0; i < cclPositive.height;i++)
+	{
+		for(int j = 0; j < cclPositive.width; j++)
+		{
+			data[(i*temp->widthStep) + j ] = target[i][j];
+			//printf("%i %i %u \n",i,j,test[i][j]);
+		}
+	}
+	temp->imageData = (char*)data;
+
+	// a visualization window is created with title 'image'
+	cvNamedWindow ("image2", 1);
+	// img is shown in 'image' window
+	cvShowImage ("image2", temp);
 
 
-		// wait for infinite delay for a keypress
-		cvWaitKey (0);
-		// memory release for img before exiting the application
-		cvReleaseImage (&temp);
-		cvDestroyWindow("image2");
+	// wait for infinite delay for a keypress
+	cvWaitKey (0);
+	// memory release for img before exiting the application
+	cvReleaseImage (&temp);
+	cvDestroyWindow("image2");
 
 
 
@@ -128,6 +132,7 @@ int main (int argc, char *argv[])
 	// memory release for img before exiting the application
 	cvReleaseImage (&img);
 	cvReleaseImage (&img2);
+	cvReleaseImage (&img3);
 	//free malloc'd mem
 	printf("Freeing memory...\n");
 	free(cclPositive.labels);
