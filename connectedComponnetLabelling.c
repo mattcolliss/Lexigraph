@@ -52,42 +52,81 @@ CCL_Object connectedComponentLabeling(IplImage *img)
 	//first pass
 	for(int i = 1; i < height;i++)
 	{
-		for(int j = 1; j < width; j++)
+		for(int j = 1; j < width - 1; j++)
 		{
 			//if this is a foreground pixel
 			if(source[i][j] != 0)
 			{
-				int top, left;
-				//get the 2 already visited neighbour pixels
+				int top, left, topLeft, topRight;
+				//get the 4 already visited neighbour pixels
 				top = source[i - 1][j];
+				topLeft = source[i - 1][j - 1];
 				left = source[i][j - 1];
+				//topRight = source[i - 1][j + 1];
 
-				//if left and top are background pixels
-				if(top == 0 && left == 0)
+				//count how many are non-zero
+				int count = 0;
+				if(top != 0) count++;
+				if(left != 0) count++;
+				if(topLeft != 0) count++;
+				if(topRight != 0) count++;
+
+				//if all are background pixels, e count == 0
+				if(count == 0)
 				{
 					if(nextLabel < maxLabel - 1) nextLabel++;
 					source[i][j] = nextLabel;
 
 				}
-				//if they're both foreground pixels
-				else if(classes[top] != classes[left] && top != 0 && left != 0)
+				//if more that one is foreground
+				else if(count > 1)
 				{
-					int min, max = 0;
-					if(top < left)
+					int min = left;
+					if((top < min && top != 0) || min == 0) min = top;
+					if((topLeft < min && topLeft != 0) || min == 0) min = topLeft;
+					if((topRight < min && topRight != 0) || min == 0) min = topRight;
+
+					if(classes[left] != classes[min])
 					{
-						min = top;
-						max = left;
-					}
-					else
-					{
-						min = left;
-						max = max;
-					}
-					for(int k = 0;k <= nextLabel;k++)
-					{
-						if (classes[k] == classes[max])
+						for(int k = 0;k <= nextLabel;k++)
 						{
-							classes[k] = classes[min];
+							if (classes[k] == classes[left])
+							{
+								classes[k] = classes[min];
+							}
+						}
+					}
+
+					if(classes[top] != classes[min])
+					{
+						for(int k = 0;k <= nextLabel;k++)
+						{
+							if (classes[k] == classes[top])
+							{
+								classes[k] = classes[min];
+							}
+						}
+					}
+
+					if(classes[topLeft] != classes[min])
+					{
+						for(int k = 0;k <= nextLabel;k++)
+						{
+							if (classes[k] == classes[topLeft])
+							{
+								classes[k] = classes[min];
+							}
+						}
+					}
+
+					if(classes[topRight] != classes[min])
+					{
+						for(int k = 0;k <= nextLabel;k++)
+						{
+							if (classes[k] == classes[topRight])
+							{
+								classes[k] = classes[min];
+							}
 						}
 					}
 					source[i][j] = min;
@@ -102,6 +141,15 @@ CCL_Object connectedComponentLabeling(IplImage *img)
 					source[i][j] = top;
 				}
 
+				else if (topLeft != 0)
+				{
+					source[i][j] = topLeft;
+				}
+
+				else if (topRight != 0)
+				{
+					source[i][j] = topRight;
+				}
 			} //if
 		} //for	j
 	} //for i

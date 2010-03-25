@@ -1,7 +1,7 @@
 
 #include "sobelFilter.h"
 
-#define SOBEL_THRESHOLD 100
+#define SOBEL_THRESHOLD 15
 
 CCL_Object sobelFilter(CCL_Object source,IplImage *img)
 {
@@ -89,7 +89,7 @@ CCL_Object sobelFilter(CCL_Object source,IplImage *img)
 
 	for(int i = 0;i < source.classCount;i++)
 	{
-		printf("%i \n",average[i]);
+		//printf("%i \n",average[i]);
 		if(average[i] < SOBEL_THRESHOLD && average[i] != 0)
 		{
 			source.classSizes[i] = 0;

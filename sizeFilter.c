@@ -1,8 +1,10 @@
 //TODO: header comment
 #include "sizeFilter.h"
 
-#define MIN_SIZE 50
-#define MAX_SIZE 1000
+#define MIN_SIZE 20
+#define MAX_SIZE 5000
+#define MAX_OCCUPY_RATIO 0.95
+#define MIN_OCCUPY_RATIO 0.2
 
 
 void buildCloseList(int close[],CCL_Object source)
@@ -57,6 +59,7 @@ CCL_Object sizeFilter(CCL_Object source)
 	int close[source.classCount];
 	buildCloseList(close,source);
 
+	//class size
 	for(int i = 0;i < source.classCount;i++)
 	{
 		//printf("%i \n",source.classSizes[i]);
@@ -70,6 +73,21 @@ CCL_Object sizeFilter(CCL_Object source)
 			source.maxJ[i] = -1;
 		}
 	}
+
+	//occupy ratio
+	for(int i = 0;i < source.classCount;i++)
+	{
+		if(source.classSizes[i] != 0)
+		{
+			int bbWidth = (source.maxJ[i] - source.minJ[i]) + 1;
+			int bbHeight = (source.maxI[i] - source.minI[i]) + 1;
+			float bbArea = bbWidth * bbHeight;
+			float occupyRatio = source.classSizes[i] / bbArea;
+			if(occupyRatio > MAX_OCCUPY_RATIO || occupyRatio < MIN_OCCUPY_RATIO) source.classSizes[i] = 0;
+		}
+
+	}
+
 
 	for(int i = 0;i < imageSize;i++)
 	{
