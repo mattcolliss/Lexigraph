@@ -17,8 +17,9 @@
 #include "thresholding/localIterativeThreshold.h"
 #include "thresholding/repeatedIterativeThresholding.h"
 #include "connectedComponentLabelling.h"
-#include "sizeFilter.h"
-#include "sobelFilter.h"
+#include "filters/sizeFilter.h"
+#include "filters/sobelFilter.h"
+#include "filters/eigenTransform.h"
 
 int main (int argc, char *argv[])
 {
@@ -66,6 +67,9 @@ int main (int argc, char *argv[])
 
 	//second test, sobel
 	cclPositive = sobelFilter(cclPositive,img3);
+
+	//third test, eigen transform
+	cclPositive = eigenTransform(cclPositive,img3);
 
 
 	////////////////////////////////////////////////////
@@ -122,13 +126,13 @@ int main (int argc, char *argv[])
 	cvSaveImage("output.jpg",img2);
 
 	// a visualization window is created with title 'image'
-	cvNamedWindow ("image", 1);
+	//cvNamedWindow ("image", 1);
 	// img is shown in 'image' window
-	cvShowImage ("image", img2);
+	//cvShowImage ("image", img2);
 
 
 	// wait for infinite delay for a keypress
-	cvWaitKey (0);
+	//cvWaitKey (0);
 	// memory release for img before exiting the application
 	cvReleaseImage (&img);
 	cvReleaseImage (&img2);
@@ -143,7 +147,7 @@ int main (int argc, char *argv[])
 	free(cclPositive.maxJ);
 	printf("Done\n");
 	//destory image window
-	cvDestroyWindow("image");
+	//cvDestroyWindow("image");
 
 	return 0;
 }

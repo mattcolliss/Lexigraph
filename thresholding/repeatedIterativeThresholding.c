@@ -118,7 +118,7 @@ void repeatedIterativeThreshold(IplImage *img)
 	{
 
 		//TODO: change this back
-		if(data[i] <= bestThreshold)
+		if(data[i] >= bestThreshold)
 		{
 			data[i] = 0;
 		}

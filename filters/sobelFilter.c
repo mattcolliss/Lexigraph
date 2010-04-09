@@ -1,7 +1,7 @@
 
 #include "sobelFilter.h"
 
-#define SOBEL_THRESHOLD 15
+#define SOBEL_THRESHOLD 5
 
 CCL_Object sobelFilter(CCL_Object source,IplImage *img)
 {

@@ -10,7 +10,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "connectedComponentLabelling.h"
+#include "../connectedComponentLabelling.h"
 #include "convolution.h"
 #define SOBELFILTER_H_
 
