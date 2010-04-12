@@ -12,7 +12,7 @@
 #define MAXW 55
 #define MINW 3
 #define SAMPLES 10
-#define EIGENLIMIT 2
+#define EIGENLIMIT 15
 
 int inRange(int i,int j,int height,int width)
 {

@@ -80,12 +80,13 @@ Result iterativeThresholdRep(int intialThreshold,uchar* data,int imageSize)
 	return currentResult;
 }
 
-void repeatedIterativeThreshold(IplImage *img)
+void repeatedIterativeThreshold(IplImage *img, IplImage *negImg)
 {
 	printf("Performing repeated iterative thresholding...\n");
 	int intialValues[repeats];
 	Result results[repeats];
 	uchar* data = (uchar *)img->imageData;
+	uchar* negData = (uchar *)negImg->imageData;
 	int imageSize = img->imageSize;
 
 	//generate n random starting thresholds
@@ -118,16 +119,19 @@ void repeatedIterativeThreshold(IplImage *img)
 	{
 
 		//TODO: change this back
-		if(data[i] >= bestThreshold)
+		if(data[i] <= bestThreshold)
 		{
 			data[i] = 0;
+			negData[i] = 255;
 		}
 		else
 		{
 			data[i] = 255;
+			negData[i] = 0;
 		}
 	}
 	img->imageData = (char*)data;
+	negImg->imageData = (char*)negData;
 
 	printf("Done\n");
 }

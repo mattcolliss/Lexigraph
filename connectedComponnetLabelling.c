@@ -62,7 +62,7 @@ CCL_Object connectedComponentLabeling(IplImage *img)
 				top = source[i - 1][j];
 				topLeft = source[i - 1][j - 1];
 				left = source[i][j - 1];
-				//topRight = source[i - 1][j + 1];
+				topRight = source[i - 1][j + 1];
 
 				//count how many are non-zero
 				int count = 0;
@@ -181,11 +181,12 @@ CCL_Object connectedComponentLabeling(IplImage *img)
 	}
 
 	maxClass++;
+	printf("%i \n",maxClass);
 	int *classSizes = malloc(maxClass * sizeof (int));
-	int *minI = malloc(maxClass * sizeof (int));
-	int *minJ = malloc(maxClass * sizeof (int));
-	int *maxI = malloc(maxClass * sizeof (int));
-	int *maxJ = malloc(maxClass * sizeof (int));
+	int *minI = malloc(maxClass * sizeof(int));
+	int *minJ = malloc(maxClass * sizeof(int));
+	int *maxI = malloc(maxClass * sizeof(int));
+	int *maxJ = malloc(maxClass * sizeof(int));
 	for(int i = 0;i < maxClass;i++)
 	{
 		classSizes[i] = 0;

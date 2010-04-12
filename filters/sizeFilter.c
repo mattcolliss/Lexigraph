@@ -2,7 +2,7 @@
 #include "sizeFilter.h"
 
 #define MIN_SIZE 20
-#define MAX_SIZE 5000
+#define MAX_SIZE 50000
 #define MAX_OCCUPY_RATIO 0.95
 #define MIN_OCCUPY_RATIO 0.2
 
@@ -69,10 +69,11 @@ CCL_Object sizeFilter(CCL_Object source)
 			source.classSizes[i] = 0;
 			source.minI[i] = 9999;
 			source.minJ[i] = 9999;
-			source.maxI[i] = -1;
-			source.maxJ[i] = -1;
+			source.maxI[i] = 0;
+			source.maxJ[i] = 0;
 		}
 	}
+
 
 	//occupy ratio
 	for(int i = 0;i < source.classCount;i++)
@@ -85,8 +86,10 @@ CCL_Object sizeFilter(CCL_Object source)
 			float occupyRatio = source.classSizes[i] / bbArea;
 			if(occupyRatio > MAX_OCCUPY_RATIO || occupyRatio < MIN_OCCUPY_RATIO) source.classSizes[i] = 0;
 		}
-
 	}
+
+
+
 
 
 	for(int i = 0;i < imageSize;i++)

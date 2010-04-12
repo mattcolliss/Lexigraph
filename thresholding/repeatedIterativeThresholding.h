@@ -15,6 +15,6 @@
 #define REPEATEDITERATIVETHRESHOLD_H_
 
 
-void repeatedIterativeThreshold(IplImage *img);
+void repeatedIterativeThreshold(IplImage *img, IplImage *negImg);
 
 #endif /* REPEATEDITERATIVETHRESHOLD_H_ */

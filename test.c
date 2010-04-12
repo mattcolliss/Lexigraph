@@ -21,6 +21,48 @@
 #include "filters/sobelFilter.h"
 #include "filters/eigenTransform.h"
 
+
+void showImage(CCL_Object sourceData, char *tag)
+{
+
+	////////////////////////////////////////////////////
+	int target[sourceData.height][sourceData.width];
+
+	for(int i = 0;i < sourceData.height;i++)
+	{
+		for(int j = 0;j < sourceData.width;j++)
+		{
+			int pix = sourceData.labels[(i * sourceData.width) + j];
+			if(pix != 0)
+				target[i][j] =  255;
+			else
+				target[i][j] = 0;
+		}
+	}
+
+	//create temp image to display results
+	IplImage *temp = cvCreateImage(cvSize(sourceData.width,sourceData.height),IPL_DEPTH_8U,1);
+	uchar* data = (uchar *)temp->imageData;
+	//copy new data into image
+	for(int i = 0; i < sourceData.height;i++)
+	{
+		for(int j = 0; j < sourceData.width; j++)
+		{
+			data[(i*temp->widthStep) + j ] = target[i][j];
+			//printf("%i %i %u \n",i,j,test[i][j]);
+		}
+	}
+	temp->imageData = (char*)data;
+
+	cvNamedWindow (tag, 1);
+	cvShowImage (tag, temp);
+	cvWaitKey (0);
+	cvDestroyWindow(tag);
+
+	cvReleaseImage (&temp);
+
+}
+
 int main (int argc, char *argv[])
 {
 	if(argc<2)
@@ -41,102 +83,55 @@ int main (int argc, char *argv[])
 		exit(0);
 	}
 
-	//convert image to grey scale
-	IplImage *img2 = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
-	cvCvtColor(img,img2,CV_BGR2GRAY);
+	//convert image to grey scale - will later be converted to binary, hence name
+	IplImage *binaryImg = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
+	cvCvtColor(img,binaryImg,CV_BGR2GRAY);
+
+	//create an inverted grey scaled image, for dark on light text
+	IplImage *invertedBinaryImg = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
+	cvCvtColor(img,invertedBinaryImg,CV_BGR2GRAY);
 
 	//convert image to grey scale, keep this one for later
-	IplImage *img3 = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
-	cvCvtColor(img,img3,CV_BGR2GRAY);
+	IplImage *greyImage = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
+	cvCvtColor(img,greyImage,CV_BGR2GRAY);
 
 	//Threshold the image
-	//localAdaptiveThreshold(img2,15,15);
-	//otsuThreshold(img2);
-	//iterativeThreshold(img2);
-	//TODO: debug this
-	//localOtsuThreshold(img2);
-	//localIterativeThreshold(img2);
-	repeatedIterativeThreshold(img2);
+	repeatedIterativeThreshold(binaryImg,invertedBinaryImg);
+	// a visualisation window is created with title 'image'
+	cvNamedWindow ("Lexigraph", 1);
+	cvShowImage ("Lexigraph", binaryImg);
+	cvWaitKey (0);
 
 	//CC labelling
-	CCL_Object cclPositive;
-	cclPositive = connectedComponentLabeling(img2);
+	CCL_Object cclPositive, cclNegative;
+	cclPositive = connectedComponentLabeling(binaryImg);
+	cclNegative = connectedComponentLabeling(invertedBinaryImg);
 
 	//first test, size of cc
 	cclPositive = sizeFilter(cclPositive);
+	cclNegative = sizeFilter(cclNegative);
+	showImage(cclPositive,"Size");
 
 	//second test, sobel
-	cclPositive = sobelFilter(cclPositive,img3);
+	cclPositive = sobelFilter(cclPositive,greyImage);
+	cclNegative = sobelFilter(cclNegative,greyImage);
+	showImage(cclPositive,"Sobel");
 
 	//third test, eigen transform
-	cclPositive = eigenTransform(cclPositive,img3);
-
-
-	////////////////////////////////////////////////////
-	int target[cclPositive.height][cclPositive.width];
-
-	for(int i = 0;i < cclPositive.height;i++)
-	{
-		for(int j = 0;j < cclPositive.width;j++)
-		{
-			int pix = cclPositive.labels[(i * cclPositive.width) + j];
-			if(pix != 0)
-				target[i][j] =  255;
-			else
-				target[i][j] = 0;
-
-		}
-	}
-
-	//create temp image to display results
-	IplImage *temp = cvCreateImage(cvSize(cclPositive.width,cclPositive.height),IPL_DEPTH_8U,1);
-	uchar* data = (uchar *)temp->imageData;
-	//copy new data into image
-	for(int i = 0; i < cclPositive.height;i++)
-	{
-		for(int j = 0; j < cclPositive.width; j++)
-		{
-			data[(i*temp->widthStep) + j ] = target[i][j];
-			//printf("%i %i %u \n",i,j,test[i][j]);
-		}
-	}
-	temp->imageData = (char*)data;
-
-	// a visualization window is created with title 'image'
-	cvNamedWindow ("image2", 1);
-	// img is shown in 'image' window
-	cvShowImage ("image2", temp);
-
-
-	// wait for infinite delay for a keypress
-	cvWaitKey (0);
-	// memory release for img before exiting the application
-	cvReleaseImage (&temp);
-	cvDestroyWindow("image2");
+	cclPositive = eigenTransform(cclPositive,greyImage);
+	cclNegative = eigenTransform(cclNegative,greyImage);
+	showImage(cclPositive,"Eigen");
 
 
 
 
-	////////////////////////////////////////////////////
 
-
-
-
-	//save the image
-	cvSaveImage("output.jpg",img2);
-
-	// a visualization window is created with title 'image'
-	//cvNamedWindow ("image", 1);
-	// img is shown in 'image' window
-	//cvShowImage ("image", img2);
-
-
-	// wait for infinite delay for a keypress
-	//cvWaitKey (0);
 	// memory release for img before exiting the application
 	cvReleaseImage (&img);
-	cvReleaseImage (&img2);
-	cvReleaseImage (&img3);
+	cvReleaseImage (&binaryImg);
+	cvReleaseImage (&greyImage);
+
+
 	//free malloc'd mem
 	printf("Freeing memory...\n");
 	free(cclPositive.labels);
@@ -147,7 +142,7 @@ int main (int argc, char *argv[])
 	free(cclPositive.maxJ);
 	printf("Done\n");
 	//destory image window
-	//cvDestroyWindow("image");
+	cvDestroyWindow("Lexigraph");
 
 	return 0;
 }
