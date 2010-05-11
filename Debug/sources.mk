@@ -25,5 +25,6 @@ C_UPPER_DEPS :=
 SUBDIRS := \
 thresholding \
 . \
+grouping \
 filters \
 

@@ -20,6 +20,7 @@
 #include "filters/sizeFilter.h"
 #include "filters/sobelFilter.h"
 #include "filters/eigenTransform.h"
+#include "grouping/perceptualGrouping.h"
 
 
 void showImage(CCL_Object sourceData, char *tag)
@@ -65,13 +66,21 @@ void showImage(CCL_Object sourceData, char *tag)
 
 int main (int argc, char *argv[])
 {
-	if(argc<2)
+	if(argc < 2)
 	{
 		printf("Usage: main <image-file-name>\n");
 		exit(0);
 	}
 
 	printf("%s \n",argv[1]);
+
+	//determine whether demo mode is activated
+	int demo = 0;
+	if(argc >2 && !strncmp(argv[2],"-d",2))
+	{
+		printf("Demonstration mode... \n");
+		demo = 1;
+	}
 
 	//create an image
 	IplImage *img = 0;
@@ -98,9 +107,12 @@ int main (int argc, char *argv[])
 	//Threshold the image
 	repeatedIterativeThreshold(binaryImg,invertedBinaryImg);
 	// a visualisation window is created with title 'image'
-	cvNamedWindow ("Lexigraph", 1);
-	cvShowImage ("Lexigraph", binaryImg);
-	cvWaitKey (0);
+	if(demo > 0)
+	{
+		cvNamedWindow ("Lexigraph", 1);
+		cvShowImage ("Lexigraph", binaryImg);
+		cvWaitKey (0);
+	}
 
 	//CC labelling
 	CCL_Object cclPositive, cclNegative;
@@ -110,19 +122,19 @@ int main (int argc, char *argv[])
 	//first test, size of cc
 	cclPositive = sizeFilter(cclPositive);
 	cclNegative = sizeFilter(cclNegative);
-	showImage(cclPositive,"Size");
+	if(demo > 0) showImage(cclPositive,"Size");
 
 	//second test, sobel
 	cclPositive = sobelFilter(cclPositive,greyImage);
 	cclNegative = sobelFilter(cclNegative,greyImage);
-	showImage(cclPositive,"Sobel");
+	if(demo > 0) showImage(cclPositive,"Sobel");
 
 	//third test, eigen transform
 	cclPositive = eigenTransform(cclPositive,greyImage);
 	cclNegative = eigenTransform(cclNegative,greyImage);
-	showImage(cclPositive,"Eigen");
+	if(demo > 0) showImage(cclPositive,"Eigen");
 
-
+	perceptualGrouping();
 
 
 
@@ -141,8 +153,8 @@ int main (int argc, char *argv[])
 	free(cclPositive.maxI);
 	free(cclPositive.maxJ);
 	printf("Done\n");
-	//destory image window
-	cvDestroyWindow("Lexigraph");
+	//destory image window - if it was created for demo
+	if(demo > 0) cvDestroyWindow("Lexigraph");
 
 	return 0;
 }

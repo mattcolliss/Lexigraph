@@ -9,7 +9,8 @@ test.d test.o: ../test.c /usr/include/opencv/cv.h \
  ../thresholding/repeatedIterativeThresholding.h \
  ../connectedComponentLabelling.h ../filters/sizeFilter.h \
  ../filters/../connectedComponentLabelling.h ../filters/sobelFilter.h \
- ../filters/convolution.h ../filters/eigenTransform.h
+ ../filters/convolution.h ../filters/eigenTransform.h \
+ ../grouping/perceptualGrouping.h
 
 /usr/include/opencv/cv.h:
 
@@ -50,3 +51,5 @@ test.d test.o: ../test.c /usr/include/opencv/cv.h \
 ../filters/convolution.h:
 
 ../filters/eigenTransform.h:
+
+../grouping/perceptualGrouping.h:
