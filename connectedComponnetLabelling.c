@@ -181,7 +181,7 @@ CCL_Object connectedComponentLabeling(IplImage *img)
 	}
 
 	maxClass++;
-	printf("%i \n",maxClass);
+	//printf("%i \n",maxClass);
 	int *classSizes = malloc(maxClass * sizeof (int));
 	int *minI = malloc(maxClass * sizeof(int));
 	int *minJ = malloc(maxClass * sizeof(int));

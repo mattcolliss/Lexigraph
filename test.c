@@ -18,7 +18,8 @@
 #include "thresholding/repeatedIterativeThresholding.h"
 #include "connectedComponentLabelling.h"
 #include "filters/sizeFilter.h"
-#include "filters/sobelFilter.h"
+#include "filters/borderEnergy.h"
+#include "filters/edgeContrst.h"
 #include "filters/eigenTransform.h"
 #include "grouping/perceptualGrouping.h"
 
@@ -72,7 +73,7 @@ int main (int argc, char *argv[])
 		exit(0);
 	}
 
-	printf("%s \n",argv[1]);
+	printf("Reading file %s \n",argv[1]);
 
 	//determine whether demo mode is activated
 	int demo = 0;
@@ -104,8 +105,14 @@ int main (int argc, char *argv[])
 	IplImage *greyImage = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
 	cvCvtColor(img,greyImage,CV_BGR2GRAY);
 
+	//create a grey scale image to pass to edge contrast to apply gaussian blur to
+	IplImage *greyBlur = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
+	cvCvtColor(img,greyBlur,CV_BGR2GRAY);
+
 	//Threshold the image
 	repeatedIterativeThreshold(binaryImg,invertedBinaryImg);
+	//iterativeThreshold(binaryImg);
+	//otsuThreshold(binaryImg);
 	// a visualisation window is created with title 'image'
 	if(demo > 0)
 	{
@@ -122,19 +129,20 @@ int main (int argc, char *argv[])
 	//first test, size of cc
 	cclPositive = sizeFilter(cclPositive);
 	cclNegative = sizeFilter(cclNegative);
-	if(demo > 0) showImage(cclPositive,"Size");
+	if(demo > 0) showImage(cclPositive,"Geometric Filters");
 
-	//second test, sobel
-	cclPositive = sobelFilter(cclPositive,greyImage);
-	cclNegative = sobelFilter(cclNegative,greyImage);
-	if(demo > 0) showImage(cclPositive,"Sobel");
+	//second test, border energy OR edge contrast
+	cclPositive = borderEnergyFilter(cclPositive,greyImage);
+	cclNegative = borderEnergyFilter(cclNegative,greyImage);
+	if(demo > 0) showImage(cclPositive,"Border Energy");
+	//cclPositive = edgeContrastFilter(cclPositive,greyImage);
 
 	//third test, eigen transform
 	cclPositive = eigenTransform(cclPositive,greyImage);
 	cclNegative = eigenTransform(cclNegative,greyImage);
-	if(demo > 0) showImage(cclPositive,"Eigen");
+	if(demo > 0)showImage(cclPositive,"Eigen");
 
-	perceptualGrouping();
+	perceptualGrouping(cclPositive,greyImage);
 
 
 
@@ -142,6 +150,7 @@ int main (int argc, char *argv[])
 	cvReleaseImage (&img);
 	cvReleaseImage (&binaryImg);
 	cvReleaseImage (&greyImage);
+	cvReleaseImage (&greyBlur);
 
 
 	//free malloc'd mem

@@ -5,15 +5,15 @@
  *      Author: matt
  */
 
-#ifndef SOBELFILTER_H_
+#ifndef BORDERENRGY_H_
 #include <cv.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "../connectedComponentLabelling.h"
 #include "convolution.h"
-#define SOBELFILTER_H_
+#define BORDERENRGY_H_
 
-CCL_Object sobelFilter(CCL_Object source,IplImage *img);
+CCL_Object borderEnergyFilter(CCL_Object source,IplImage *img);
 
 #endif /* SOBELFILTER_H_ */

@@ -8,9 +8,10 @@ test.d test.o: ../test.c /usr/include/opencv/cv.h \
  ../thresholding/localIterativeThreshold.h \
  ../thresholding/repeatedIterativeThresholding.h \
  ../connectedComponentLabelling.h ../filters/sizeFilter.h \
- ../filters/../connectedComponentLabelling.h ../filters/sobelFilter.h \
- ../filters/convolution.h ../filters/eigenTransform.h \
- ../grouping/perceptualGrouping.h
+ ../filters/../connectedComponentLabelling.h ../filters/borderEnergy.h \
+ ../filters/convolution.h ../filters/edgeContrst.h \
+ ../filters/eigenTransform.h ../grouping/perceptualGrouping.h \
+ ../grouping/../connectedComponentLabelling.h ../grouping/pilu.h
 
 /usr/include/opencv/cv.h:
 
@@ -46,10 +47,16 @@ test.d test.o: ../test.c /usr/include/opencv/cv.h \
 
 ../filters/../connectedComponentLabelling.h:
 
-../filters/sobelFilter.h:
+../filters/borderEnergy.h:
 
 ../filters/convolution.h:
+
+../filters/edgeContrst.h:
 
 ../filters/eigenTransform.h:
 
 ../grouping/perceptualGrouping.h:
+
+../grouping/../connectedComponentLabelling.h:
+
+../grouping/pilu.h:

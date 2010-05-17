@@ -12,7 +12,7 @@
 #define MAXW 55
 #define MINW 3
 #define SAMPLES 10
-#define EIGENLIMIT 15
+#define EIGENLIMIT 20
 
 int inRange(int i,int j,int height,int width)
 {
@@ -24,7 +24,7 @@ int inRange(int i,int j,int height,int width)
 	return 0;
 }
 
-int generateEigenValue(int i,int j,int height,int width,int source[],int W)
+float generateEigenValue(int i,int j,int height,int width,int source[],int W)
 {
 
 
@@ -35,7 +35,7 @@ int generateEigenValue(int i,int j,int height,int width,int source[],int W)
 
 	float window[W * W];
 	int c = 0;
-	int L = W / 3;
+	int L = W / 7;
 
 	//populate window with W * W neighbour pixels of i,j
 	for(int p = i - W/2; p <= i + W/2; p++)
@@ -138,23 +138,57 @@ CCL_Object eigenTransform(CCL_Object source,IplImage *img)
 	}
 
 
-	/*
+/*////////////DISPLAY IMAGE CODE//////////////////////////
 	for(int i = 0; i < height;i++)
 	{
 		for(int j = 0; j < width; j++)
 		{
 			int label  = source.labels[(i * width) + j];
-			if(label != 0)
-			{
+			//if(label != 0)
+			//{
 				int regionHeight = (source.maxI[label] - source.minI[label]) + 1;
-;				data[(i*step) + j ] = generateEigenValue(i,j,height,width,imageArray,regionHeight);
-			}
-			else
-			{
-				data[(i*step) + j ] = 0;
-			}
+				float tester = generateEigenValue(i,j,height,width,imageArray,regionHeight);
+				tester = (tester / 3) * 255;
+				if(tester > 255) tester = 255;
+				data[(i*step) + j ] = (int)tester;
+
+				//printf("%i \n",data[(i*step) + j ]);
+			//}
+			//else
+			//{
+				//data[(i*step) + j ] = 0;
+			//}
 		}
-	}*/
+	}
+
+	/////////////////
+
+		//uchar* data = (uchar *)img->imageData;
+		//int step = img->widthStep;
+		//copy new data into image
+		//for(int i = 0; i < img->height;i++)
+		//{
+		//	for(int j = 0; j < img->width; j++)
+			//{
+		//		data[(i*step) + j ] = canny[i][j];   ///also need to change to 255
+				//data[(i*step) + j ] = G[i *  width + j];
+				//printf("%i %i %u \n",i,j,test[i][j]);
+		//	}
+		//}
+
+		img->imageData = (char*)data;
+		// a visualization window is created with title 'image'
+
+		cvSaveImage("canny.jpg",img);
+		cvNamedWindow ("image2", 1);
+		// img is shown in 'image' window
+		cvShowImage ("image2", img);
+
+
+		// wait for infinite delay for a keypress
+		cvWaitKey (0);
+		cvDestroyWindow("image2");
+*///////////////////END OF IMAGE CODE//////////////////////////
 
 
 	//seed randon numbers
@@ -182,10 +216,13 @@ CCL_Object eigenTransform(CCL_Object source,IplImage *img)
 			//printf("%2.2f \n",eigenValueSum/SAMPLES);
 			eigenValueSum = eigenValueSum / SAMPLES;
 
+			printf("%2.4f \n",eigenValueSum);
+
 			if(eigenValueSum >= EIGENLIMIT) results[c] = 1;
 			else results[c] = 0;
 
 			//TODO: break CC entry here
+
 
 
 		}
@@ -197,6 +234,18 @@ CCL_Object eigenTransform(CCL_Object source,IplImage *img)
 		{
 			int label  = source.labels[(i * width) + j];
 			if(results[label] == 0) source.labels[(i * width) + j] = 0;
+		}
+	}
+
+	for(int i = 0; i < source.classCount;i++)
+	{
+		if(results[i] == 0)
+		{
+			source.classSizes[i] = 0;
+			source.minI[i] = 9999;
+			source.minJ[i] = 9999;
+			source.maxI[i] = -1;
+			source.maxJ[i] = -1;
 		}
 	}
 

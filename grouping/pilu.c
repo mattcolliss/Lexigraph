@@ -8,7 +8,7 @@
 
 #include "pilu.h"
 
-#define PI 3.141592;
+#define PI 3.141592
 
 //finds euclidean distance between 2 points
 float distance(Point p,Point q)
@@ -163,7 +163,7 @@ float piluOperator(Point aTop,Point aBottom,Point bTop,Point bBottom)
 
 	if((aMin + bMin) != 0)
 	{
-		lamda = Dmin / (aMin + bMin);
+		lamda = (2 * Dmin) / (aMin + bMin);
 	}
 
 	float gamma = 0;
@@ -178,7 +178,9 @@ float piluOperator(Point aTop,Point aBottom,Point bTop,Point bBottom)
 
 	float pilu = piluTerm1 * piluTerm2;
 
-	printf("%2.112f \n",pilu);
+	//printf("%2.112f \n",pilu);
+
+	return pilu;
 
 
 }

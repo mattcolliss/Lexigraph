@@ -1,11 +1,11 @@
 
-#include "sobelFilter.h"
+#include "borderEnergy.h"
 
 #define SOBEL_THRESHOLD 5
 
-CCL_Object sobelFilter(CCL_Object source,IplImage *img)
+CCL_Object borderEnergyFilter(CCL_Object source,IplImage *img)
 {
-	printf("Filtering CCs by Sobel operator...\n");
+	printf("Filtering CCs by border energy...\n");
 	int height = source.height;
 	int width = source.width;
 	int imageSize = height * width;
@@ -110,7 +110,7 @@ CCL_Object sobelFilter(CCL_Object source,IplImage *img)
 	}
 
 
-	/*///////////////////////////////////////////////
+	/*//////////////////////////////////////////////
 
 	for(int i =0;i < imageSize;i++)
 	{
@@ -130,6 +130,8 @@ CCL_Object sobelFilter(CCL_Object source,IplImage *img)
 	}
 
 	img->imageData = (char*)data;
+	//save image
+	//cvSaveImage("sobel.jpg",img);
 	// a visualization window is created with title 'image'
 	cvNamedWindow ("image2", 1);
 	// img is shown in 'image' window
@@ -139,7 +141,7 @@ CCL_Object sobelFilter(CCL_Object source,IplImage *img)
 	// wait for infinite delay for a keypress
 	cvWaitKey (0);
 	cvDestroyWindow("image2");
-	 */
+	*///////////////////////////////////
 
 
 
