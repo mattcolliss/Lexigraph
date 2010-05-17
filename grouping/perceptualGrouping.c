@@ -70,7 +70,7 @@ BBox extendBox(BBox source, Point top,Point bottom)
 	result.top.j = MIN(source.top.j,top.j);
 	result.bottom.i = MAX(source.bottom.i,bottom.i);
 	result.bottom.j = MAX(source.bottom.j,bottom.j);
-
+	result.size = source.size;
 	return result;
 }
 
@@ -102,11 +102,12 @@ void perceptualGrouping(CCL_Object source,IplImage *img)
 			blobs[p].bottom.j = source.maxJ[i];
 			blobs[p].centre = findCentre(blobs[p].top,blobs[p].bottom);
 			blobs[p].linked = -1;
-			blobs[p].grouped = -1;
+			blobs[p].group = -1;
 			p++;
 		}
 	}
 
+	int groupCount = 0;
 	for(int i = 0;i < c;i++)
 	{
 		float maxPilu = 0;
@@ -129,12 +130,85 @@ void perceptualGrouping(CCL_Object source,IplImage *img)
 		{
 			blobs[i].next = blobs[pointer].centre;
 			blobs[i].linked = pointer;
+
+
+			//update groups
+			if(blobs[i].group == -1) //i.e new group
+			{
+				if(blobs[pointer].group != -1) //ie next is already in a group
+				{
+					//update group equivalences
+					for(int k = 0;k < c;k++)
+					{
+						if(blobs[k].group == blobs[pointer].group) blobs[k].group = groupCount;
+					}
+				}
+				blobs[pointer].group = groupCount;
+				blobs[i].group = groupCount;
+				groupCount++;
+			}
+			else
+			{
+				if(blobs[pointer].group == -1) blobs[pointer].group = blobs[i].group;
+				else
+				{
+					//update group equivalences
+					for(int k = 0;k < c;k++)
+					{
+						if(blobs[k].group == blobs[pointer].group) blobs[k].group = blobs[i].group;
+					}
+				}
+			}
+
+
 			//draw line, image, pt1, pt2, colour, thickness, type, offset
 			cvLine(displayImage,cvPoint(blobs[i].centre.j,blobs[i].centre.i),cvPoint(blobs[i].next.j,blobs[i].next.i),cvScalar(155,0,0,0),2,8,0);
-		}
 
+		}
 	}
- /*
+
+	//array of BBoxes
+	BBox boxes[groupCount];
+	//build BBoxes
+	for(int i = 0;i < groupCount;i++)
+	{
+		//initialise box - inside out
+		boxes[i].top.i = 9999;
+		boxes[i].top.j = 9999;
+		boxes[i].bottom.i = -1;
+		boxes[i].bottom.j = -1;
+		boxes[i].size = 0;
+
+		//for each bob
+		for(int j = 0;j < c;j++)
+		{
+			//if its in this group
+			if(blobs[j].group == i)
+			{
+				//add it to the bbox
+				boxes[i].size++;
+				boxes[i] = extendBox(boxes[i],blobs[j].top,blobs[j].bottom);
+			}
+		}
+	}
+
+	//for each box
+	for(int i = 0;i < groupCount;i++)
+	{
+		//if its got more than one thing in it
+		//printf("%i \n",boxes[i].size);
+		if(boxes[i].size > 1)
+		{
+			//draw it
+			drawBox(boxes[i],displayImage);
+		}
+	}
+
+
+
+
+
+	/*
 	//array of BBoxes
 	BBox boxes[c];
 	int b = 0;
@@ -224,7 +298,7 @@ void perceptualGrouping(CCL_Object source,IplImage *img)
 	}
 
 	drawBox(biggest,displayImage);
-*/
+	 */
 
 	//show the image
 	cvNamedWindow("ImageWindow", CV_WINDOW_AUTOSIZE);

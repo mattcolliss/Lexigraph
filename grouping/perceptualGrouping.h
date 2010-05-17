@@ -23,14 +23,14 @@ typedef struct
 	Point centre;
 	Point next;
 	int linked;
-	int grouped;
+	int group;
 } Blob;
 
 typedef struct
 {
 	Point top;
 	Point bottom;
-	int invalid;
+	int size;
 } BBox;
 
 void perceptualGrouping(CCL_Object source,IplImage *img);
