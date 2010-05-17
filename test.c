@@ -132,10 +132,10 @@ int main (int argc, char *argv[])
 	if(demo > 0) showImage(cclPositive,"Geometric Filters");
 
 	//second test, border energy OR edge contrast
-	cclPositive = borderEnergyFilter(cclPositive,greyImage);
-	cclNegative = borderEnergyFilter(cclNegative,greyImage);
+	//cclPositive = borderEnergyFilter(cclPositive,greyImage);
+	//cclNegative = borderEnergyFilter(cclNegative,greyImage);
+	cclPositive = edgeContrastFilter(cclPositive,greyImage);
 	if(demo > 0) showImage(cclPositive,"Border Energy");
-	//cclPositive = edgeContrastFilter(cclPositive,greyImage);
 
 	//third test, eigen transform
 	cclPositive = eigenTransform(cclPositive,greyImage);

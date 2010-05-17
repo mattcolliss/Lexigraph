@@ -1,79 +1,47 @@
 //TODO: header comment
 #include "sizeFilter.h"
 
-#define MIN_SIZE 20
-#define MAX_SIZE 50000
+
+#define MAX_WIDTH_RATIO 0.1
+#define MIN_WIDTH_RATIO 0.01
+#define MAX_HEIGHT_RATIO 0.1
+#define MIN_HEIGHT_RATIO 0.01
 #define MAX_OCCUPY_RATIO 0.95
 #define MIN_OCCUPY_RATIO 0.2
+#define MAX_ASPECT_RATIO 7
 
 
-void buildCloseList(int close[],CCL_Object source)
-{
-	int labels[source.height][source.width];
-	int width =  source.width;
-	int height = source.height;
-
-	for(int i = 0;i < source.classCount;i++)
-	{
-		close[i] = 0;
-	}
-
-	for(int i = 0;i < height;i++)
-	{
-		for(int j = 0;j < width;j++)
-		{
-			labels[i][j] = source.labels[(i * width) + j];
-		}
-	}
-
-	for(int i = 1;i < height;i++)
-	{
-		for(int j = 1;j < width;j++)
-		{
-			//if(labels[i][j] != 0 && close[labels[i][j]] == 0)
-			if(labels[i][j] != 0)
-			{
-				for(int a = i - 1;a <= i + 1;a++)
-				{
-					for(int b = j - 1;b <= j + 1;b++)
-					{
-						if(labels[a][b] != 0 && labels[a][b] != labels[i][j])
-						{
-							//close[labels[i][j]] = 1;
-							//break;
-							close[labels[i][j]]++;
-						}
-					}
-				}
-			}
-		}
-	}
-}
 
 CCL_Object sizeFilter(CCL_Object source)
 {
 	printf("Filtering CCs by size...\n");
-	int width =  source.width;
-	int height = source.height;
-	int imageSize = width * height;
-	int close[source.classCount];
-	buildCloseList(close,source);
+	int imageWidth =  source.width;
+	int imageHeight = source.height;
+	int imageSize = imageWidth * imageHeight;
 
-	//class size
+	//width ratio
 	for(int i = 0;i < source.classCount;i++)
 	{
-		//printf("%i \n",source.classSizes[i]);
-		int size = source.classSizes[i];
-		if((size <= MIN_SIZE && close[i] < 1) || size >= MAX_SIZE)
+		if(source.classSizes[i] > 0)
 		{
-			source.classSizes[i] = 0;
-			source.minI[i] = 9999;
-			source.minJ[i] = 9999;
-			source.maxI[i] = 0;
-			source.maxJ[i] = 0;
+			float width = (source.maxJ[i] - source.minJ[i]) + 1;
+			float widthRatio = width / imageWidth;
+			//printf("%2.2f %i %2.10f \n",width,imageWidth,widthRatio);
+			if(widthRatio > MAX_WIDTH_RATIO || widthRatio <  MIN_WIDTH_RATIO ) source.classSizes[i] = 0;
 		}
 	}
 
+	//height ratio
+	for(int i = 0;i < source.classCount;i++)
+	{
+		if(source.classSizes[i] > 0)
+		{
+			float height = (source.maxI[i] - source.minI[i]) + 1;
+			float heightRatio = height / imageHeight;
+			//printf("%2.2f %i %2.10f \n",height,imageHeight,heightRatio);
+			if(heightRatio > MAX_HEIGHT_RATIO || heightRatio <  MIN_HEIGHT_RATIO ) source.classSizes[i] = 0;
+		}
+	}
 
 	//occupy ratio
 	for(int i = 0;i < source.classCount;i++)
@@ -88,6 +56,20 @@ CCL_Object sizeFilter(CCL_Object source)
 		}
 	}
 
+	//apsect ratio
+	for(int i = 0;i < source.classCount;i++)
+	{
+		if(source.classSizes[i] != 0)
+		{
+			int bbWidth = (source.maxJ[i] - source.minJ[i]) + 1;
+			int bbHeight = (source.maxI[i] - source.minI[i]) + 1;
+			float wh = bbWidth / bbHeight;
+			float hw = bbHeight / bbWidth;
+			float aspectRatio = MAX(wh,hw);
+			//printf("%2.4f \n",aspectRatio);
+			if(aspectRatio >=  MAX_ASPECT_RATIO) source.classSizes[i] = 0;
+		}
+	}
 
 
 
@@ -100,8 +82,6 @@ CCL_Object sizeFilter(CCL_Object source)
 			source.labels[i] = 0;
 		}
 	}
-
-
 
 
 	printf("Done \n");

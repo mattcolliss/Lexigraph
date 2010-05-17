@@ -12,7 +12,7 @@
 #define MAXW 55
 #define MINW 3
 #define SAMPLES 10
-#define EIGENLIMIT 20
+#define EIGENLIMIT 10
 
 int inRange(int i,int j,int height,int width)
 {
@@ -35,7 +35,8 @@ float generateEigenValue(int i,int j,int height,int width,int source[],int W)
 
 	float window[W * W];
 	int c = 0;
-	int L = W / 7;
+	//int L = W / 6;
+	int L = 2;
 
 	//populate window with W * W neighbour pixels of i,j
 	for(int p = i - W/2; p <= i + W/2; p++)
@@ -216,7 +217,7 @@ CCL_Object eigenTransform(CCL_Object source,IplImage *img)
 			//printf("%2.2f \n",eigenValueSum/SAMPLES);
 			eigenValueSum = eigenValueSum / SAMPLES;
 
-			printf("%2.4f \n",eigenValueSum);
+			//printf("%2.4f \n",eigenValueSum);
 
 			if(eigenValueSum >= EIGENLIMIT) results[c] = 1;
 			else results[c] = 0;
