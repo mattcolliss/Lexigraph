@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <cv.h>
 #include <highgui.h>
+#include <time.h>
 #include "thresholding/adaptiveThreshold.h"
 #include "thresholding/otsuThreshold.h"
 #include "thresholding/iterativeThreshold.h"
@@ -55,6 +56,8 @@ void showImage(CCL_Object sourceData, char *tag)
 		}
 	}
 	temp->imageData = (char*)data;
+
+	cvSaveImage("output.png",temp);
 
 	cvNamedWindow (tag, 1);
 	cvShowImage (tag, temp);
@@ -108,14 +111,30 @@ int main (int argc, char *argv[])
 	//create a grey scale image to pass to edge contrast to apply gaussian blur to
 	IplImage *greyBlur = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
 	cvCvtColor(img,greyBlur,CV_BGR2GRAY);
+	IplImage *greyBlur2 = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,1);
+	cvCvtColor(img,greyBlur2,CV_BGR2GRAY);
+
+
+	//clock_t start, finish;
+	//start = clock();
+
 
 	//Threshold the image
+	//localAdaptiveThresholdSlow(binaryImg,45,45);
+
+	//finish = clock();
+	//float time = ( (finish - start) );
+	//printf("%2.2f \n",time);
+
+
+	//localOtsuThreshold(binaryImg);
 	repeatedIterativeThreshold(binaryImg,invertedBinaryImg);
 	//iterativeThreshold(binaryImg);
 	//otsuThreshold(binaryImg);
 	// a visualisation window is created with title 'image'
 	if(demo > 0)
 	{
+		cvSaveImage("output.png",binaryImg);
 		cvNamedWindow ("Lexigraph", 1);
 		cvShowImage ("Lexigraph", binaryImg);
 		cvWaitKey (0);
@@ -134,7 +153,8 @@ int main (int argc, char *argv[])
 	//second test, border energy OR edge contrast
 	//cclPositive = borderEnergyFilter(cclPositive,greyImage);
 	//cclNegative = borderEnergyFilter(cclNegative,greyImage);
-	cclPositive = edgeContrastFilter(cclPositive,greyImage);
+	cclPositive = edgeContrastFilter(cclPositive,greyBlur);
+	cclNegative = edgeContrastFilter(cclNegative,greyBlur2);
 	if(demo > 0) showImage(cclPositive,"Border Energy");
 
 	//third test, eigen transform
@@ -142,7 +162,24 @@ int main (int argc, char *argv[])
 	cclNegative = eigenTransform(cclNegative,greyImage);
 	if(demo > 0)showImage(cclPositive,"Eigen");
 
-	perceptualGrouping(cclPositive,greyImage);
+	perceptualGrouping(cclPositive,cclNegative,greyImage);
+
+
+
+	if(argc >3 && !strncmp(argv[2],"-r",2))
+	{
+		printf("Results analysis... \n");
+		IplImage *groundTruth = 0;
+		// load an image
+		groundTruth = cvLoadImage(argv[3],-1);
+
+		IplImage *greyGround = cvCreateImage(cvSize(groundTruth->width,groundTruth->height),IPL_DEPTH_8U,1);
+		cvCvtColor(groundTruth,greyGround,CV_BGR2GRAY);
+		//cvThreshold(greyGround,greyGround,100,255,CV_THRESH_BINARY);
+		analyseResult(greyImage,greyGround);
+
+	}
+
 
 
 
@@ -151,6 +188,7 @@ int main (int argc, char *argv[])
 	cvReleaseImage (&binaryImg);
 	cvReleaseImage (&greyImage);
 	cvReleaseImage (&greyBlur);
+	cvReleaseImage (&greyBlur2);
 
 
 	//free malloc'd mem

@@ -131,7 +131,7 @@ CCL_Object borderEnergyFilter(CCL_Object source,IplImage *img)
 
 	img->imageData = (char*)data;
 	//save image
-	//cvSaveImage("sobel.jpg",img);
+	cvSaveImage("sobel.png",img);
 	// a visualization window is created with title 'image'
 	cvNamedWindow ("image2", 1);
 	// img is shown in 'image' window

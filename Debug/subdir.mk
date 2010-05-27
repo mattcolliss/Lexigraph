@@ -4,14 +4,17 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 C_SRCS += \
+../analysis.c \
 ../connectedComponnetLabelling.c \
 ../test.c 
 
 OBJS += \
+./analysis.o \
 ./connectedComponnetLabelling.o \
 ./test.o 
 
 C_DEPS += \
+./analysis.d \
 ./connectedComponnetLabelling.d \
 ./test.d 
 

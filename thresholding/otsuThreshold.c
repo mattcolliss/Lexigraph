@@ -38,6 +38,11 @@ void otsuThreshold(IplImage *img)
 		}
 	}
 
+	for(int i = 0;i < levels;i++)
+	{
+		printf("%i \n",histogram[i]);
+	}
+
 	//total number of pixels
 	int total = (img->height * img->width);
 

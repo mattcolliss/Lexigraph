@@ -19,6 +19,7 @@ void iterativeThreshold(IplImage *img)
 	int newThreshold = rand() % 255;
 	int oldThreshold = 0;
 
+	printf("%i \n",newThreshold);
 
 	while(newThreshold != oldThreshold)
 	{
@@ -55,18 +56,25 @@ void iterativeThreshold(IplImage *img)
 
 	}
 
+	//int objCount = 0;
+	//int backCount = 0;
+
+
 	//threshold image
 	for(int i = 0;i < imageSize;i++)
 	{
 		if(data[i] <= newThreshold)
 		{
 			data[i] = 0;
+			//backCount++;
 		}
 		else
 		{
 			data[i] = 255;
+			//objCount++;
 		}
 	}
+	//printf("%i %i %i \n",backCount,objCount,newThreshold);
 	//copy new data into image
 	img->imageData = (char*)data;
 	printf("Done \n");

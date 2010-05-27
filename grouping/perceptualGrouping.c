@@ -8,7 +8,7 @@
 
 #include "perceptualGrouping.h"
 
-#define PILULIMIT 0.015
+#define PILULIMIT 0.01
 
 
 //return the width of a BBox
@@ -75,34 +75,43 @@ BBox extendBox(BBox source, Point top,Point bottom)
 }
 
 
-void perceptualGrouping(CCL_Object source,IplImage *img)
+void perceptualGrouping(CCL_Object positiveSource,CCL_Object negativeSource,IplImage *img)
 {
 	printf("Performing perceptual grouping...\n");
 
 	IplImage *displayImage = cvCreateImage(cvSize(img->width,img->height),IPL_DEPTH_8U,3);
 	cvCvtColor(img,displayImage,CV_GRAY2BGR);
 
+	int positiveMappings[positiveSource.classCount];
+	for(int i = 0;i < positiveSource.classCount;i++){ positiveMappings[i] = -1;}
+
+	int negativeMappings[negativeSource.classCount];
+	for(int i = 0;i < negativeSource.classCount;i++){ negativeMappings[i] = -1;}
+
+
+	//POSITIVE PASS
 	//count the number of non-zero classes
 	int c = 0;
-	for(int i = 0;i < source.classCount;i++)
+	for(int i = 0;i < positiveSource.classCount;i++)
 	{
-		if(source.classSizes[i] > 0) c++;
+		if(positiveSource.classSizes[i] > 0) c++;
 	}
 	//build the blob data structure
-	Blob blobs[c];
+	Blob positiveBlobs[c];
 	int p = 0;
-	for(int i = 0;i < source.classCount;i++)
+	for(int i = 0;i < positiveSource.classCount;i++)
 	{
-		if(source.classSizes[i] > 0)
+		if(positiveSource.classSizes[i] > 0)
 		{
-			blobs[p].size = source.classSizes[i];
-			blobs[p].top.i = source.minI[i];
-			blobs[p].top.j = source.minJ[i];
-			blobs[p].bottom.i = source.maxI[i];
-			blobs[p].bottom.j = source.maxJ[i];
-			blobs[p].centre = findCentre(blobs[p].top,blobs[p].bottom);
-			blobs[p].linked = -1;
-			blobs[p].group = -1;
+			positiveBlobs[p].size = positiveSource.classSizes[i];
+			positiveBlobs[p].top.i = positiveSource.minI[i];
+			positiveBlobs[p].top.j = positiveSource.minJ[i];
+			positiveBlobs[p].bottom.i = positiveSource.maxI[i];
+			positiveBlobs[p].bottom.j = positiveSource.maxJ[i];
+			positiveBlobs[p].centre = findCentre(positiveBlobs[p].top,positiveBlobs[p].bottom);
+			positiveBlobs[p].linked = -1;
+			positiveBlobs[p].group = -1;
+			positiveMappings[i] = p;
 			p++;
 		}
 	}
@@ -115,9 +124,9 @@ void perceptualGrouping(CCL_Object source,IplImage *img)
 
 		for(int j = 0;j < c;j++)
 		{
-			if(i != j && blobs[j].linked != i)
+			if(i != j && positiveBlobs[j].linked != i)
 			{
-				float pilu = piluOperator(blobs[i].top,blobs[i].bottom,blobs[j].top,blobs[j].bottom);
+				float pilu = piluOperator(positiveBlobs[i].top,positiveBlobs[i].bottom,positiveBlobs[j].top,positiveBlobs[j].bottom);
 				if(pilu > maxPilu)
 				{
 					maxPilu = pilu;
@@ -128,44 +137,132 @@ void perceptualGrouping(CCL_Object source,IplImage *img)
 
 		if(maxPilu >= PILULIMIT)
 		{
-			blobs[i].next = blobs[pointer].centre;
-			blobs[i].linked = pointer;
+			positiveBlobs[i].next = positiveBlobs[pointer].centre;
+			positiveBlobs[i].linked = pointer;
 
 
 			//update groups
-			if(blobs[i].group == -1) //i.e new group
+			if(positiveBlobs[i].group == -1) //i.e new group
 			{
-				if(blobs[pointer].group != -1) //ie next is already in a group
+				if(positiveBlobs[pointer].group != -1) //ie next is already in a group
 				{
 					//update group equivalences
 					for(int k = 0;k < c;k++)
 					{
-						if(blobs[k].group == blobs[pointer].group) blobs[k].group = groupCount;
+						if(positiveBlobs[k].group == positiveBlobs[pointer].group) positiveBlobs[k].group = groupCount;
 					}
 				}
-				blobs[pointer].group = groupCount;
-				blobs[i].group = groupCount;
+				positiveBlobs[pointer].group = groupCount;
+				positiveBlobs[i].group = groupCount;
 				groupCount++;
 			}
 			else
 			{
-				if(blobs[pointer].group == -1) blobs[pointer].group = blobs[i].group;
+				if(positiveBlobs[pointer].group == -1) positiveBlobs[pointer].group = positiveBlobs[i].group;
 				else
 				{
 					//update group equivalences
 					for(int k = 0;k < c;k++)
 					{
-						if(blobs[k].group == blobs[pointer].group) blobs[k].group = blobs[i].group;
+						if(positiveBlobs[k].group == positiveBlobs[pointer].group) positiveBlobs[k].group = positiveBlobs[i].group;
 					}
 				}
 			}
 
 
 			//draw line, image, pt1, pt2, colour, thickness, type, offset
-			cvLine(displayImage,cvPoint(blobs[i].centre.j,blobs[i].centre.i),cvPoint(blobs[i].next.j,blobs[i].next.i),cvScalar(155,0,0,0),2,8,0);
+			cvLine(displayImage,cvPoint(positiveBlobs[i].centre.j,positiveBlobs[i].centre.i),cvPoint(positiveBlobs[i].next.j,positiveBlobs[i].next.i),cvScalar(155,0,0,0),2,8,0);
 
 		}
 	}
+	/////////////////////////////////////////////////////////////////////////
+	//NEGATIVE PASS
+	//count the number of non-zero classes
+	int n = 0;
+	for(int i = 0;i < negativeSource.classCount;i++)
+	{
+		if(negativeSource.classSizes[i] > 0) n++;
+	}
+	//build the blob data structure
+	Blob negativeBlobs[n];
+	p = 0;
+	for(int i = 0;i < negativeSource.classCount;i++)
+	{
+		if(negativeSource.classSizes[i] > 0)
+		{
+			negativeBlobs[p].size = negativeSource.classSizes[i];
+			negativeBlobs[p].top.i = negativeSource.minI[i];
+			negativeBlobs[p].top.j = negativeSource.minJ[i];
+			negativeBlobs[p].bottom.i = negativeSource.maxI[i];
+			negativeBlobs[p].bottom.j = negativeSource.maxJ[i];
+			negativeBlobs[p].centre = findCentre(negativeBlobs[p].top,negativeBlobs[p].bottom);
+			negativeBlobs[p].linked = -1;
+			negativeBlobs[p].group = -1;
+			negativeMappings[i] = p;
+			p++;
+		}
+	}
+
+	for(int i = 0;i < n;i++)
+	{
+		float maxPilu = 0;
+		int pointer = 0;
+
+		for(int j = 0;j < n;j++)
+		{
+			if(i != j && negativeBlobs[j].linked != i)
+			{
+				float pilu = piluOperator(negativeBlobs[i].top,negativeBlobs[i].bottom,negativeBlobs[j].top,negativeBlobs[j].bottom);
+				if(pilu > maxPilu)
+				{
+					maxPilu = pilu;
+					pointer = j;
+				}
+			}
+		}
+
+		if(maxPilu >= PILULIMIT)
+		{
+			negativeBlobs[i].next = negativeBlobs[pointer].centre;
+			negativeBlobs[i].linked = pointer;
+
+
+			//update groups
+			if(negativeBlobs[i].group == -1) //i.e new group
+			{
+				if(negativeBlobs[pointer].group != -1) //ie next is already in a group
+				{
+					//update group equivalences
+					for(int k = 0;k < n;k++)
+					{
+						if(negativeBlobs[k].group == negativeBlobs[pointer].group) negativeBlobs[k].group = groupCount;
+					}
+				}
+				negativeBlobs[pointer].group = groupCount;
+				negativeBlobs[i].group = groupCount;
+				groupCount++;
+			}
+			else
+			{
+				if(negativeBlobs[pointer].group == -1) negativeBlobs[pointer].group = negativeBlobs[i].group;
+				else
+				{
+					//update group equivalences
+					for(int k = 0;k < n;k++)
+					{
+						if(negativeBlobs[k].group == negativeBlobs[pointer].group) negativeBlobs[k].group = negativeBlobs[i].group;
+					}
+				}
+			}
+
+
+			//draw line, image, pt1, pt2, colour, thickness, type, offset
+			cvLine(displayImage,cvPoint(negativeBlobs[i].centre.j,negativeBlobs[i].centre.i),cvPoint(negativeBlobs[i].next.j,negativeBlobs[i].next.i),cvScalar(155,0,0,0),2,8,0);
+
+		}
+	}
+
+	/////////////////////////////////////////////////////////////////
 
 	//array of BBoxes
 	BBox boxes[groupCount];
@@ -179,15 +276,26 @@ void perceptualGrouping(CCL_Object source,IplImage *img)
 		boxes[i].bottom.j = -1;
 		boxes[i].size = 0;
 
-		//for each bob
+		//for each positive blob
 		for(int j = 0;j < c;j++)
 		{
 			//if its in this group
-			if(blobs[j].group == i)
+			if(positiveBlobs[j].group == i)
 			{
 				//add it to the bbox
 				boxes[i].size++;
-				boxes[i] = extendBox(boxes[i],blobs[j].top,blobs[j].bottom);
+				boxes[i] = extendBox(boxes[i],positiveBlobs[j].top,positiveBlobs[j].bottom);
+			}
+		}
+		//for each negative blob
+		for(int j = 0;j < n;j++)
+		{
+			//if its in this group
+			if(negativeBlobs[j].group == i)
+			{
+				//add it to the bbox
+				boxes[i].size++;
+				boxes[i] = extendBox(boxes[i],negativeBlobs[j].top,negativeBlobs[j].bottom);
 			}
 		}
 	}
@@ -205,102 +313,8 @@ void perceptualGrouping(CCL_Object source,IplImage *img)
 	}
 
 
-
-
-
-	/*
-	//array of BBoxes
-	BBox boxes[c];
-	int b = 0;
-
-	int finished = 0;
-	while(finished == 0)
-	{
-		//find the next non-grouped blob
-		Blob current;
-		int cont = 0;
-		for(int i = 0;i < c;i++)
-		{
-			if(blobs[i].grouped == -1)
-			{
-				cont = 1;
-				blobs[i].grouped = b;
-				current = blobs[i];
-				break;
-			}
-		}
-
-		//if we found a blob, and it has a link
-		if(cont == 1 && current.linked != -1)
-		{
-			//BBox box;
-
-			boxes[b].top = current.top;
-			boxes[b].bottom = current.bottom;
-			boxes[b].invalid = 0;
-			int linked = 1;
-			while(linked > 0)
-			{
-				if(current.linked != -1)
-				{
-					int pointer = current.linked;
-					if(blobs[pointer].grouped == -1)
-					{
-						blobs[pointer].grouped = b;
-						current = blobs[pointer];
-						boxes[b] = extendBox(boxes[b],current.top,current.bottom);
-					}
-					else
-					{
-						int oldBox = blobs[pointer].grouped;
-						boxes[b] = combineBoxes(boxes[b],boxes[oldBox]);
-						//blobs[pointer].grouped = b;
-						for(int i = 0;i < c;i++)
-						{
-							if(blobs[i].grouped == oldBox)
-							{
-								blobs[i].grouped = b;
-							}
-						}
-						current = blobs[pointer];
-						boxes[oldBox].invalid = 1;
-					}
-				}
-				else
-				{
-					linked = 0;
-				}
-			}
-			b++;
-
-		}
-
-		if(cont == 0) finished = 1;
-	}
-
-	//find the biggest box for demo purposes
-	BBox biggest;
-	int maxSize = -1;
-
-	for(int i = 0;i < b;i++)
-	{
-
-		if(boxes[i].invalid == 0)
-		{
-			drawBox(boxes[i],displayImage);
-			if(boxWidth(boxes[i]) > maxSize)
-			{
-				maxSize = boxWidth(boxes[i]);
-				biggest = boxes[i];
-			}
-		}
-
-	}
-
-	drawBox(biggest,displayImage);
-	 */
-
 	//show the image
+	cvSaveImage("grouping.png",displayImage);
 	cvNamedWindow("ImageWindow", CV_WINDOW_AUTOSIZE);
 	cvShowImage("ImageWindow", displayImage);
 	printf("Image displayed...\n");
@@ -308,6 +322,50 @@ void perceptualGrouping(CCL_Object source,IplImage *img)
 	//wait till key is pressed
 	printf("PRESS A KEY NOW...\n");
 	cvWaitKey(0);
+
+	//update img
+	int target[positiveSource.height][positiveSource.width];
+
+	for(int i = 0;i < positiveSource.height;i++)
+	{
+		for(int j = 0;j < positiveSource.width;j++)
+		{
+			int pos = positiveSource.labels[(i * positiveSource.width) + j];
+			pos = positiveMappings[pos];
+			if(pos != -1)
+			{
+				pos = positiveBlobs[pos].group;
+				pos = boxes[pos].size;
+			}
+			int neg = negativeSource.labels[(i * negativeSource.width) + j];
+			//int neg = -1;
+			neg = negativeMappings[neg];
+			if(pos != -1)
+			{
+				neg = negativeBlobs[neg].group;
+				neg = boxes[neg].size;
+			}
+			if(pos > 1 || neg > 1)
+			{
+				target[i][j] =  255;
+			}else
+			{
+				target[i][j] = 0;
+			}
+		}
+	}
+	uchar* data = (uchar *)img->imageData;
+	//copy new data into image
+	for(int i = 0; i < positiveSource.height;i++)
+	{
+		for(int j = 0; j < positiveSource.width; j++)
+		{
+			data[(i*img->widthStep) + j ] = target[i][j];
+			//printf("%i %i %u \n",i,j,test[i][j]);
+		}
+	}
+	img->imageData = (char*)data;
+
 
 
 

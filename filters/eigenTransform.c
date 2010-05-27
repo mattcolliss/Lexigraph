@@ -12,7 +12,7 @@
 #define MAXW 55
 #define MINW 3
 #define SAMPLES 10
-#define EIGENLIMIT 10
+#define EIGENLIMIT 10.5
 
 int inRange(int i,int j,int height,int width)
 {
@@ -222,7 +222,6 @@ CCL_Object eigenTransform(CCL_Object source,IplImage *img)
 			if(eigenValueSum >= EIGENLIMIT) results[c] = 1;
 			else results[c] = 0;
 
-			//TODO: break CC entry here
 
 
 

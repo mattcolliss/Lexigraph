@@ -8,8 +8,8 @@
 
 #include "localOtsuThreshold.h"
 
-#define windowHeight  17
-#define windowWidth  17
+#define windowHeight  75
+#define windowWidth  75
 #define levels 255
 
 

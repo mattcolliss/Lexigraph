@@ -33,7 +33,7 @@ typedef struct
 	int size;
 } BBox;
 
-void perceptualGrouping(CCL_Object source,IplImage *img);
+void perceptualGrouping(CCL_Object positiveSource,CCL_Object negativeSource,IplImage *img);
 
 #endif /* PERCEPTUALGROUPING_H_ */
 

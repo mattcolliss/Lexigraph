@@ -3,11 +3,11 @@
 
 
 #define MAX_WIDTH_RATIO 0.1
-#define MIN_WIDTH_RATIO 0.01
+#define MIN_WIDTH_RATIO 0.001
 #define MAX_HEIGHT_RATIO 0.1
 #define MIN_HEIGHT_RATIO 0.01
 #define MAX_OCCUPY_RATIO 0.95
-#define MIN_OCCUPY_RATIO 0.2
+#define MIN_OCCUPY_RATIO 0.15
 #define MAX_ASPECT_RATIO 7
 
 
@@ -39,7 +39,7 @@ CCL_Object sizeFilter(CCL_Object source)
 			float height = (source.maxI[i] - source.minI[i]) + 1;
 			float heightRatio = height / imageHeight;
 			//printf("%2.2f %i %2.10f \n",height,imageHeight,heightRatio);
-			if(heightRatio > MAX_HEIGHT_RATIO || heightRatio <  MIN_HEIGHT_RATIO ) source.classSizes[i] = 0;
+			//if(heightRatio > MAX_HEIGHT_RATIO || heightRatio <  MIN_HEIGHT_RATIO ) source.classSizes[i] = 0;
 		}
 	}
 

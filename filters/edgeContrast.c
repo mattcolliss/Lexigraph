@@ -5,7 +5,7 @@
 #include "edgeContrst.h"
 
 #define PI 3.141592
-#define EDGELIMIT 0.75
+#define EDGELIMIT 0.1
 
 int getPixel(IplImage *img,int i,int j)
 {
@@ -50,7 +50,7 @@ CCL_Object edgeContrastFilter(CCL_Object source,IplImage *img)
 
 	//Find canny edges
 	//apply gaussian blur to image
-	cvSmooth( img, img, CV_GAUSSIAN,7,7,0,0);
+	cvSmooth( img, img, CV_GAUSSIAN,17,17,0,0);
 	//Find sobel edges of smoothed version
 	int *gXCanny = (int*)malloc(imageSize * sizeof (int));
 	convolve(gXCanny,hX,3,height,width,img);
@@ -306,7 +306,7 @@ CCL_Object edgeContrastFilter(CCL_Object source,IplImage *img)
 	img->imageData = (char*)data;
 	// a visualization window is created with title 'image'
 
-	cvSaveImage("canny.jpg",img);
+	cvSaveImage("canny.png",img);
 	cvNamedWindow ("image2", 1);
 	// img is shown in 'image' window
 	cvShowImage ("image2", img);
@@ -316,7 +316,7 @@ CCL_Object edgeContrastFilter(CCL_Object source,IplImage *img)
 	cvWaitKey (0);
 	cvDestroyWindow("image2");
 
-	/*//////////////////////////
+	/*/////////////////////////
 
 
 
