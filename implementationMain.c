@@ -2,6 +2,7 @@
 //
 // Matthew Colliss
 //
+// Implementaion main, main method from where everything else is run
 //
 /////////////////////////////////////////////////////////////////////////////
 
@@ -23,8 +24,9 @@
 #include "filters/edgeContrst.h"
 #include "filters/eigenTransform.h"
 #include "grouping/perceptualGrouping.h"
+#include "analysis.h"
 
-
+//show an image for demonstratiion
 void showImage(CCL_Object sourceData, char *tag)
 {
 

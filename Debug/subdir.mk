@@ -6,17 +6,17 @@
 C_SRCS += \
 ../analysis.c \
 ../connectedComponnetLabelling.c \
-../test.c 
+../implementationMain.c 
 
 OBJS += \
 ./analysis.o \
 ./connectedComponnetLabelling.o \
-./test.o 
+./implementationMain.o 
 
 C_DEPS += \
 ./analysis.d \
 ./connectedComponnetLabelling.d \
-./test.d 
+./implementationMain.d 
 
 
 # Each subdirectory must supply rules for building sources it contributes

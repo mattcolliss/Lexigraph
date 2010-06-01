@@ -1,4 +1,10 @@
-
+/////////////////////////////////////////////////////////////////////////////
+//
+// Matthew Colliss
+//
+// Filter CCs by edge contrast
+//
+/////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -7,6 +13,7 @@
 #define PI 3.141592
 #define EDGELIMIT 0.1
 
+//get the value of pixel i,j
 int getPixel(IplImage *img,int i,int j)
 {
 	uchar* data = (uchar *)img->imageData;

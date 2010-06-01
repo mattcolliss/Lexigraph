@@ -1,4 +1,10 @@
-//TODO: header comment
+/////////////////////////////////////////////////////////////////////////////
+//
+// Matthew Colliss
+//
+// Filter CCs by geometric features
+//
+/////////////////////////////////////////////////////////////////////////////
 #include "sizeFilter.h"
 
 
@@ -71,9 +77,7 @@ CCL_Object sizeFilter(CCL_Object source)
 		}
 	}
 
-
-
-
+	//remove CCs
 	for(int i = 0;i < imageSize;i++)
 	{
 		int size = source.classSizes[source.labels[i]];

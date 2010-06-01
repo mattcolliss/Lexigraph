@@ -1,9 +1,10 @@
-/*
- * analysis.c
- *
- *  Created on: 21 May 2010
- *      Author: matt
- */
+/////////////////////////////////////////////////////////////////////////////
+//
+// Matthew Colliss
+//
+// Performs analysis of result accuracy
+//
+/////////////////////////////////////////////////////////////////////////////
 
 #include "analysis.h"
 
@@ -28,6 +29,7 @@ void analyseResult(IplImage *result, IplImage *groundTruth)
 	float error = 0;
 	float miss = 0;
 
+	//for each pixel in result
 	for(int i = 0; i <  height; i++)
 	{
 		for(int j = 0; j <  width; j++)
@@ -37,7 +39,7 @@ void analyseResult(IplImage *result, IplImage *groundTruth)
 
 			if(r > 0) r = 255; else r = 0;
 			if(g > 0) g = 255; else g = 0;
-
+			//calculate no oh misses, errors etc
 			//if(g!=0)printf("%i %i \n",r,g);
 			if(r > 0 && g > 0) {hit++;}
 			else if(r > 0 && g == 0) {error++;}

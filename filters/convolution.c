@@ -1,9 +1,10 @@
-/*
- * convolution.c
- *
- *  Created on: 17 Mar 2010
- *      Author: matt
- */
+/////////////////////////////////////////////////////////////////////////////
+//
+// Matthew Colliss
+//
+// 2d convolution with image and kernel
+//
+/////////////////////////////////////////////////////////////////////////////
 
 #include "convolution.h"
 
@@ -61,6 +62,7 @@ void convolve(int target[],int kernal[],int kernalSize,int height,int width,IplI
 		}
 	}
 
+	//copy results into target image
 	for(int i = 0; i < height;i++)
 	{
 		for(int j = 0; j < width; j++)
